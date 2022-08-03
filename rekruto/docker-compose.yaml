@@ -1,0 +1,38 @@
+version: "3.8"
+services:
+  sqlite3:
+    container_name: sqlite3
+    image: nouchka/sqlite3:latest
+    stdin_open: true
+    tty: true
+    volumes:
+      - local_sqllite_data:/./root/
+
+  rekruto:
+    container_name: rekruto
+    build: .
+    restart: always
+    volumes:
+      - static_value:/app/static/
+      - media_value:/app/media/
+    ports:
+      - "8000:8000"
+    depends_on:
+      - sqlite3
+
+  nginx:
+    container_name: nginx
+    image: nginx:1.21.6
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - static_value:/var/html/static/
+      - media_value:/var/html/media/
+    depends_on:
+      - rekruto
+
+volumes:
+  local_sqllite_data:
+  static_value:
+  media_value:
